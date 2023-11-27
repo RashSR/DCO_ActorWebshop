@@ -10,4 +10,5 @@ object Webshop extends App {
   val testUser = new User("TestUser")
   system ! AddItemToBasket(testUser, new Item("Rose"))
   system ! AddItemToBasket(testUser, new Item("Gitarre"))
+  system ! MakeOrder(testUser)
 }

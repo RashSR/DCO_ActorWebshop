@@ -27,12 +27,13 @@ object WebshopActorSystem {
       msg => msg match {
         //This is request handling for user input
         case AddItemToBasket(user, item) => {
-          println(s"Author: WebshopActor --- User: ${user.userName} --- Item: ${item.itemName}")
+          println(s"[WebshopActorSystem] User: ${user.userName} --- Item: ${item.itemName}")
           basketActor ! BasketActor.AddItemToUserBasket(user, item, mapperRef)
           Behaviors.same
         }
         case MakeOrder(user) =>{
-          print("User made order")
+          println(s"[WebshopActorSystem] ${user.userName} wants to make an order.")
+          basketActor ! BasketActor.GetAllItemForUser(user, mapperRef)
           Behaviors.same
         }
         //--------------------------------------
@@ -44,7 +45,9 @@ object WebshopActorSystem {
           //In this simple example only one case is implemented
           basketResponse match {
             case AllItemsForUser(itemList) =>{
+              println("[WebshopActorSystem] print received Basket ")
               itemList.foreach(x => println(x.itemName))
+              println("[WebshopActorSystem] --------------------")
               Behaviors.same
             }
           }

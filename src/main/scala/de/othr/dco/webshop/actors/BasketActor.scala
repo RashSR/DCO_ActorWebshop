@@ -13,7 +13,7 @@ object BasketActor {
   sealed trait BasketResponse
 
   case class AddItemToUserBasket(user: User, item: Item, ref:ActorRef[AllItemsForUser]) extends BasketRequest
-  case class GetAllItemForUser(user: User) extends BasketRequest
+  case class GetAllItemForUser(user: User, ref:ActorRef[AllItemsForUser]) extends BasketRequest
   case class AllItemsForUser(itemList: List[Item]) extends BasketResponse
 
   var database = collection.mutable.Map[User, List[Item]]()
@@ -24,7 +24,7 @@ object BasketActor {
       Behaviors.receiveMessage(
         msg => msg match {
           case AddItemToUserBasket(user, item, ref) =>
-            println("Author: BasketActor --- Trying to add item to user-basket")
+            println(s"[BasketActor] Trying to add item ${item.itemName} to basket from user: ${user.userName}")
 
             if(!database.contains(user)){
               //Create new user sub-database
@@ -35,8 +35,18 @@ object BasketActor {
             ref ! AllItemsForUser(database(user))
             Behaviors.same
 
-          case GetAllItemForUser(user) =>
-            println("TODO")
+          case GetAllItemForUser(user, ref) =>
+
+            println(s"[BasketActor] Trying to get all Items for user: ${user.userName}")
+            if(!database.contains(user))
+            {
+              ref ! AllItemsForUser(List())
+            }
+            else
+            {
+              ref ! AllItemsForUser(database(user))
+            }
+
             Behaviors.same
         }
       )
