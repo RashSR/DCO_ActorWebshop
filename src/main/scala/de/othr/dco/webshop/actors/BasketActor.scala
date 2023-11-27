@@ -12,9 +12,10 @@ object BasketActor {
   sealed trait BasketRequest
   sealed trait BasketResponse
 
-  case class AddItemToUserBasket(user: User, item: Item, ref:ActorRef[AllItemsForUser]) extends BasketRequest
-  case class GetAllItemForUser(user: User, ref:ActorRef[AllItemsForUser]) extends BasketRequest
-  case class AllItemsForUser(itemList: List[Item]) extends BasketResponse
+  case class AddItemToUserBasket(user: User, item: Item, ref:ActorRef[AllItemsForUserWithoutPayment]) extends BasketRequest
+  case class GetAllItemForUser(user: User, ref:ActorRef[AllItemsForUserWithPayment]) extends BasketRequest
+  case class AllItemsForUserWithPayment(itemList: List[Item]) extends BasketResponse
+  case class AllItemsForUserWithoutPayment(itemList: List[Item]) extends BasketResponse
 
   var database = collection.mutable.Map[User, List[Item]]()
 
@@ -32,7 +33,7 @@ object BasketActor {
             }
             database(user) = item :: database(user)
 
-            ref ! AllItemsForUser(database(user))
+            ref ! AllItemsForUserWithoutPayment(database(user))
             Behaviors.same
 
           case GetAllItemForUser(user, ref) =>
@@ -40,11 +41,11 @@ object BasketActor {
             println(s"[BasketActor] Trying to get all Items for user: ${user.userName}")
             if(!database.contains(user))
             {
-              ref ! AllItemsForUser(List())
+              ref ! AllItemsForUserWithPayment(List())
             }
             else
             {
-              ref ! AllItemsForUser(database(user))
+              ref ! AllItemsForUserWithPayment(database(user))
             }
 
             Behaviors.same

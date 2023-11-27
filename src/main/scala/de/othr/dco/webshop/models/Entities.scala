@@ -4,6 +4,6 @@ object Entities {
   class User(val userName: String)
   class Item(val itemName: String)
 
-  class Order()
-  class Payment()
+  class Order(val itemList: List[Item], val payment: Payment)
+  class Payment(val price: Float)
 }
